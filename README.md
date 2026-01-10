@@ -1,9 +1,43 @@
-# pusl3120-assessment-template
+# PUSL3120 – Restaurant Takeaway System
 
-This is the template for your Pusl3120 Assessment. It uses a single repo.
+This repository contains the coursework for PUSL3120 (Full-Stack Development)
 
-Refer to the brief document for details regarding what is required.
+## Project Overview
 
-It also contains a .gitignore file, which should prevent unnecessary (temporary) files being committed (specific to Node.js, which is required).
+A restaurant takeaway web application where customers can place orders from a menu and track order status in real time. Staff users (cashier/manager) manage orders and menu items via role-based dashboards.
 
-The top level should have a single compose file, and separate directories for each application / component / container.
+## Architecture
+
+- Frontend: React + Tailwind CSS (containerised)
+- Backend: Node.js (Express) – monolithic architecture
+- Database: MongoDB (Docker)
+- Communication: REST APIs + WebSockets (planned)
+- Orchestration: Docker Compose
+
+## Repository Structure
+
+- `api/` – Backend application
+- `client/` – Frontend application (to be added)
+- `docker-compose.yml` – Multi-container orchestration
+
+## Development Setup (Backend + Database)
+
+```bash
+docker compose up -d --build
+```
+
+## API health check:
+
+```bash
+http://localhost:5000/health
+```
+
+## Mongo Express:
+
+```arduino
+http://localhost:8081
+```
+
+## Status
+
+Initial project setup complete. Core entities and features will be implemented in subsequent phases
