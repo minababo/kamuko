@@ -1,0 +1,8 @@
+const ROLES = {
+    ADMIN: "admin",
+    MANAGER: "manager",
+    CASHIER: "cashier",
+    CUSTOMER: "customer",
+  };
+  
+  module.exports = { ROLES };  
