@@ -42,5 +42,3 @@ services:
 
 volumes:
   mongo_data:
-
-  curl -i -X POST "http://localhost:5001/auth/register" -H "Content-Type: application/json" -d "{\"name\":\"Test Customer\",\"email\":\"test@example.com\",\"password\":\"password123\"}"
