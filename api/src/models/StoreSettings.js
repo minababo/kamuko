@@ -2,10 +2,8 @@ const mongoose = require("mongoose");
 
 const storeSettingsSchema = new mongoose.Schema(
   {
-    isOrderingOpen: {
-      type: Boolean,
-      default: true,
-    },
+    orderingOpen: { type: Boolean, default: true },
+    closedMessage: { type: String, trim: true, default: "" },
   },
   { timestamps: true }
 );
