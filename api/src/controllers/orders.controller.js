@@ -4,10 +4,23 @@ const Cart = require("../models/Cart");
 const CartItem = require("../models/CartItem");
 const Product = require("../models/Product");
 const { getNextOrderNumber } = require("../services/orders.service");
+const StoreSettings = require("../models/StoreSettings");
 
 async function checkout(req, res) {
   try {
-    const { customerNote } = req.body;
+    let settings = await StoreSettings.findOne();
+    if (!settings) {
+      settings = await StoreSettings.create({ orderingOpen: true, closedMessage: "" });
+    }
+
+    if (!settings.orderingOpen) {
+      return res.status(403).json({
+        error: "Ordering is currently closed",
+        message: settings.closedMessage || "Ordering is currently closed",
+      });
+    }
+
+    const { customerNote } = req.body || {};
 
     const cart = await Cart.findOne({ user: req.user._id, isActive: true });
     if (!cart) return res.status(400).json({ error: "Cart not found" });
