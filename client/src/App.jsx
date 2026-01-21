@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import Menu from './pages/Menu'
 import ProductDetail from './pages/ProductDetail'
+import Cart from './pages/Cart'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -31,13 +32,6 @@ const Profile = () => (
   <PageShell
     title="Profile"
     subtitle="Manage your account details and delivery preferences."
-  />
-)
-
-const Cart = () => (
-  <PageShell
-    title="Cart"
-    subtitle="Review items before placing your order."
   />
 )
 
