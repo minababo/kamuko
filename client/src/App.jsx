@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
 import Menu from './pages/Menu'
+import ProductDetail from './pages/ProductDetail'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -68,6 +69,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
+          <Route path="menu/:id" element={<ProductDetail />} />
           <Route path="cart" element={<Cart />} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
