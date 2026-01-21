@@ -8,6 +8,7 @@ const cartRoutes = require("./cart.routes");
 const ordersRoutes = require("./orders.routes");
 const settingsRoutes = require("./settings.routes");
 const auditRoutes = require("./audit.routes");
+const analyticsRoutes = require("./analytics.routes");
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use(cartRoutes);
 router.use(ordersRoutes);
 router.use(settingsRoutes);
 router.use(auditRoutes);
+router.use(analyticsRoutes);
 
 module.exports = router;
