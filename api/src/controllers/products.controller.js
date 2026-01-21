@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const Category = require("../models/Category");
+const { writeAuditLog } = require("../utils/audit");
 
 async function createProduct(req, res) {
   try {
@@ -15,6 +16,19 @@ async function createProduct(req, res) {
       imageUrl: imageUrl || "",
       category,
       isAvailable: isAvailable !== undefined ? isAvailable : true,
+    });
+
+    await writeAuditLog({
+      actorId: req.user._id,
+      action: "product.created",
+      entityType: "Product",
+      entityId: product._id,
+      meta: {
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        isAvailable: product.isAvailable,
+      },
     });
 
     return res.status(201).json(product);
@@ -42,8 +56,10 @@ async function listProducts(req, res) {
 
 async function getProductById(req, res) {
   try {
-    const product = await Product.findOne({ _id: req.params.id, isActive: true })
-      .populate("category", "name");
+    const product = await Product.findOne({ _id: req.params.id, isActive: true }).populate(
+      "category",
+      "name"
+    );
 
     if (!product) return res.status(404).json({ error: "Product not found" });
     return res.json(product);
@@ -70,6 +86,19 @@ async function updateProduct(req, res) {
       return res.status(404).json({ error: "Product not found" });
     }
 
+    await writeAuditLog({
+      actorId: req.user._id,
+      action: "product.updated",
+      entityType: "Product",
+      entityId: updated._id,
+      meta: {
+        name: updated.name,
+        price: updated.price,
+        category: updated.category,
+        isAvailable: updated.isAvailable,
+      },
+    });
+
     return res.json(updated);
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -85,6 +114,19 @@ async function deleteProduct(req, res) {
     );
 
     if (!updated) return res.status(404).json({ error: "Product not found" });
+
+    await writeAuditLog({
+      actorId: req.user._id,
+      action: "product.deleted",
+      entityType: "Product",
+      entityId: updated._id,
+      meta: {
+        name: updated.name,
+        price: updated.price,
+        category: updated.category,
+      },
+    });
+
     return res.json({ message: "Product deleted" });
   } catch {
     return res.status(400).json({ error: "Invalid product id" });

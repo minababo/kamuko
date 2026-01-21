@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 const { getNextOrderNumber } = require("../services/orders.service");
 const StoreSettings = require("../models/StoreSettings");
 const { emitOrderStatus } = require("../sockets");
+const { writeAuditLog } = require("../utils/audit");
 
 async function checkout(req, res) {
   try {
@@ -29,7 +30,7 @@ async function checkout(req, res) {
     const cartItems = await CartItem.find({ cart: cart._id }).populate("product");
     if (!cartItems.length) return res.status(400).json({ error: "Cart is empty" });
 
-    // Validate products still active/available
+    // Validate products still available
     for (const item of cartItems) {
       const product = await Product.findOne({ _id: item.product._id, isActive: true });
       if (!product) {
@@ -142,8 +143,22 @@ async function updateOrderStatus(req, res) {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
 
+    const oldStatus = order.status;
+
     order.status = status;
     await order.save();
+
+    await writeAuditLog({
+      actorId: req.user._id,
+      action: "order.status.updated",
+      entityType: "Order",
+      entityId: order._id,
+      meta: {
+        orderNumber: order.orderNumber,
+        from: oldStatus,
+        status: order.status,
+      },
+    });    
 
     // Emit realtime status update to the customer room
     const io = req.app.get("io");
