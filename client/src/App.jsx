@@ -4,6 +4,8 @@ import 'react-toastify/dist/ReactToastify.css'
 import './App.css'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Home from './pages/Home'
+import Menu from './pages/Menu'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -16,20 +18,6 @@ function PageShell({ title, subtitle, children }) {
     </div>
   )
 }
-
-const Home = () => (
-  <PageShell
-    title="Welcome to TasteBox"
-    subtitle="Freshly prepared meals delivered with care."
-  />
-)
-
-const Menu = () => (
-  <PageShell
-    title="Menu"
-    subtitle="Explore our chef-crafted favorites and seasonal specials."
-  />
-)
 
 const Orders = () => (
   <PageShell
