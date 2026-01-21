@@ -133,10 +133,21 @@ async function deleteProduct(req, res) {
   }
 }
 
+async function listFeaturedProducts(req, res) {
+  try {
+    const products = await Product.find({ isActive: true, isAvailable: true, isFeatured: true })
+      .sort({ updatedAt: -1 });
+    return res.json(products);
+  } catch {
+    return res.status(500).json({ error: "Failed to fetch featured products" });
+  }
+}
+
 module.exports = {
   createProduct,
   listProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  listFeaturedProducts,
 };
