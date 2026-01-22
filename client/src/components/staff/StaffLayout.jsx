@@ -22,6 +22,7 @@ function StaffLayout() {
         {
             to: '/staff',
             label: 'Dashboard',
+            roles: ['staff', 'admin'],
             icon: (
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -37,6 +38,7 @@ function StaffLayout() {
         {
             to: '/staff/orders',
             label: 'Order Queue',
+            roles: ['staff', 'admin'],
             icon: (
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -58,8 +60,9 @@ function StaffLayout() {
             ),
         },
         {
-            to: '/staff/menu',
+            to: '/admin/menu',
             label: 'Menu Management',
+            roles: ['admin'],
             icon: (
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +76,28 @@ function StaffLayout() {
                 </svg>
             ),
         },
+        {
+            to: '/admin/categories',
+            label: 'Categories',
+            roles: ['admin'],
+            icon: (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                >
+                    <path
+                        fillRule="evenodd"
+                        d="M3 6a3 3 0 013-3h2.25a3 3 0 013 3v2.25a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm9.75 0a3 3 0 013-3H18a3 3 0 013 3v2.25a3 3 0 01-3 3h-2.25a3 3 0 01-3-3V6zM3 15.75a3 3 0 013-3h2.25a3 3 0 013 3V18a3 3 0 01-3 3H6a3 3 0 01-3-3v-2.25zm9.75 0a3 3 0 013-3H18a3 3 0 013 3V18a3 3 0 01-3 3h-2.25a3 3 0 01-3-3v-2.25z"
+                        clipRule="evenodd"
+                    />
+                </svg>
+            ),
+        },
     ];
+
+    const visibleNavItems = navItems.filter((item) => item.roles.includes(user?.role));
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -93,7 +117,7 @@ function StaffLayout() {
 
                     {/* Navigation */}
                     <nav className="flex-1 space-y-1 px-3 py-4">
-                        {navItems.map((item) => (
+                        {visibleNavItems.map((item) => (
                             <NavLink key={item.to} to={item.to} end className={linkClass}>
                                 {item.icon}
                                 <span>{item.label}</span>
@@ -179,7 +203,7 @@ function StaffLayout() {
                             </div>
 
                             <nav className="flex-1 space-y-1 px-3 py-4">
-                                {navItems.map((item) => (
+                                {visibleNavItems.map((item) => (
                                     <NavLink
                                         key={item.to}
                                         to={item.to}
