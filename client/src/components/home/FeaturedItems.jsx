@@ -39,7 +39,7 @@ function FeaturedItems() {
                     throw new Error('No featured items found')
                 }
                 if (isActive) setItems(featured)
-            } catch (err) {
+            } catch {
                 try {
                     const response = await api.get('/products', {
                         params: { available: true },

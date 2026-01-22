@@ -55,7 +55,7 @@ function Menu() {
                 if (isActive) {
                     setItems(data.map(normalizeItem))
                 }
-            } catch (err) {
+            } catch {
                 if (isActive) setError('Unable to load menu items right now.')
             } finally {
                 if (isActive) setIsLoading(false)
