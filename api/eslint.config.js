@@ -1,12 +1,13 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+const globals = require("globals");
+const pluginJs = require("@eslint/js");
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+module.exports = [
     {
         languageOptions: {
             globals: {
                 ...globals.node,
+                ...globals.jest,
             },
             ecmaVersion: 2022,
             sourceType: "commonjs",
