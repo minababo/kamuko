@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../utils/api';
-import ConfirmationHeader from '../../components/order/ConfirmationHeader';
-import OrderSummaryCard from '../../components/order/OrderSummaryCard';
-import NextStepsInfo from '../../components/order/NextStepsInfo';
-import Loader from '../../components/common/Loader';
+import api from '../utils/api';
+import ConfirmationHeader from '../components/order/ConfirmationHeader';
+import OrderSummaryCard from '../components/order/OrderSummaryCard';
+import NextStepsInfo from '../components/order/NextStepsInfo';
+import Loader from '../components/common/Loader';
 import { ShoppingBag, Eye } from 'lucide-react';
 
 const OrderConfirmation = () => {
