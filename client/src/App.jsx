@@ -9,6 +9,7 @@ import Menu from './pages/Menu'
 import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import OrderConfirmation from './pages/OrderConfirmation'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -72,6 +73,7 @@ function App() {
           <Route path="register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
             <Route path="checkout" element={<Checkout />} />
+            <Route path="orders/:id/confirmation" element={<OrderConfirmation />} />
             <Route path="orders" element={<Orders />} />
             <Route path="profile" element={<Profile />} />
           </Route>
