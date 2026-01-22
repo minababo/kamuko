@@ -1,4 +1,12 @@
 services:
+  client:
+    build: ./client
+    container_name: takeaway_client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
   mongo:
     image: mongo:7
     container_name: takeaway_mongo
