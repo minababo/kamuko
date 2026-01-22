@@ -65,9 +65,9 @@ function Navbar() {
 
                     <Link to="/" className="flex items-center gap-2">
                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-lg font-bold text-orange-600">
-                            T
+                            67
                         </span>
-                        <span className="text-lg font-semibold text-gray-900">TasteBox</span>
+                        <span className="text-lg font-semibold text-gray-900">Kamuko</span>
                     </Link>
                 </div>
 
