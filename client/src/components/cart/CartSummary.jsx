@@ -31,12 +31,12 @@ function CartSummary() {
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
             </div>
-            <button
-                type="button"
-                className="w-full rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
+            <Link
+                to="/checkout"
+                className="block w-full rounded-full bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-orange-600"
             >
                 Proceed to Checkout
-            </button>
+            </Link>
             <Link
                 to="/menu"
                 className="block text-center text-sm font-semibold text-orange-600 hover:text-orange-500"
