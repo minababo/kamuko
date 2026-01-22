@@ -11,6 +11,7 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import OrderStatus from './pages/OrderStatus'
+import OrderDetails from './pages/OrderDetails'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -76,6 +77,8 @@ function App() {
             <Route path="checkout" element={<Checkout />} />
             <Route path="orders/:id/confirmation" element={<OrderConfirmation />} />
             <Route path="orders/:id/status" element={<OrderStatus />} />
+            <Route path="orders/:id/track" element={<OrderStatus />} />
+            <Route path="orders/:id" element={<OrderDetails />} />
             <Route path="orders" element={<Orders />} />
             <Route path="profile" element={<Profile />} />
           </Route>
