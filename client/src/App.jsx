@@ -14,6 +14,11 @@ import OrderStatus from './pages/OrderStatus'
 import OrderDetails from './pages/OrderDetails'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import StaffLayout from './components/staff/StaffLayout'
+import StaffDashboard from './pages/staff/Dashboard'
+import OrderQueue from './pages/staff/OrderQueue'
+import MenuManagement from './pages/admin/MenuManagement'
+import CategoryManagement from './pages/admin/CategoryManagement'
 
 function PageShell({ title, subtitle, children }) {
   return (
@@ -64,6 +69,23 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Admin Routes */}
+        <Route element={<ProtectedRoute roles={['admin']} />}>
+          <Route path="admin" element={<StaffLayout />}>
+            <Route path="menu" element={<MenuManagement />} />
+            <Route path="categories" element={<CategoryManagement />} />
+          </Route>
+        </Route>
+
+        {/* Staff Routes */}
+        <Route element={<ProtectedRoute roles={['staff', 'admin']} />}>
+          <Route path="staff" element={<StaffLayout />}>
+            <Route index element={<StaffDashboard />} />
+            <Route path="orders" element={<OrderQueue />} />
+          </Route>
+        </Route>
+
+        {/* Customer Routes */}
         <Route element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
