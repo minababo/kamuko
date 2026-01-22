@@ -9,12 +9,14 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
+  listFeaturedProducts,
 } = require("../controllers/products.controller");
 
 const router = express.Router();
 
 // Public menu browsing
 router.get("/products", listProducts);
+router.get("/products/featured", listFeaturedProducts);
 router.get("/products/:id", getProductById);
 
 // Manager/Admin only for modifications
