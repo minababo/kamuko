@@ -10,7 +10,6 @@ const settingsRoutes = require("./settings.routes");
 const auditRoutes = require("./audit.routes");
 const analyticsRoutes = require("./analytics.routes");
 const usersRoutes = require("./users.routes");
-const transactionRoutes = require("./transaction.routes");
 
 const router = express.Router();
 
@@ -25,6 +24,5 @@ router.use(settingsRoutes);
 router.use(auditRoutes);
 router.use(analyticsRoutes);
 router.use(usersRoutes);
-router.use(transactionRoutes);
 
 module.exports = router;
