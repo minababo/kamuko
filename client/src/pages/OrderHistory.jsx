@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import OrderFilters from '../components/orders/OrderFilters';
 import OrderHistoryList from '../components/orders/OrderHistoryList';
@@ -11,26 +11,21 @@ const OrderHistory = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch orders on component mount
-    useEffect(() => {
-        fetchOrders();
-    }, []);
-
-    // Filter orders when filter changes or orders update
-    useEffect(() => {
-        filterOrders();
-    }, [activeFilter, orders]);
-
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await api.get('/orders/my-orders');
+            const response = await api.get('/orders/my');
             const ordersData = response.data.data || response.data;
 
+            const normalizedOrders = (Array.isArray(ordersData) ? ordersData : []).map((order) => ({
+                ...order,
+                id: order._id || order.id,
+            }));
+
             // Sort orders by date (newest first)
-            const sortedOrders = ordersData.sort((a, b) => {
+            const sortedOrders = normalizedOrders.sort((a, b) => {
                 const dateA = new Date(a.created_at || a.createdAt);
                 const dateB = new Date(b.created_at || b.createdAt);
                 return dateB - dateA;
@@ -43,9 +38,9 @@ const OrderHistory = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const filterOrders = () => {
+    const filterOrders = useCallback(() => {
         if (activeFilter === 'all') {
             setFilteredOrders(orders);
             return;
@@ -75,7 +70,17 @@ const OrderHistory = () => {
         }
 
         setFilteredOrders(filtered);
-    };
+    }, [activeFilter, orders]);
+
+    // Fetch orders on component mount
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
+
+    // Filter orders when filter changes or orders update
+    useEffect(() => {
+        filterOrders();
+    }, [filterOrders]);
 
     const handleFilterChange = (filter) => {
         setActiveFilter(filter);

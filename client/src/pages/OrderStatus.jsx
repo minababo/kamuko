@@ -24,7 +24,7 @@ const OrderStatus = () => {
         const fetchOrder = async () => {
             try {
                 setLoading(true);
-                const response = await api.get(`/orders/${id}`);
+                const response = await api.get(`/orders/my/${id}`);
                 setOrder(response.data);
                 setError(null);
             } catch (err) {
@@ -143,7 +143,8 @@ const OrderStatus = () => {
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900">Order Status</h1>
                         <p className="mt-1 text-sm text-gray-600">
-                            Order #{order.id} · Placed {new Date(order.createdAt).toLocaleString()}
+                            Order #{order.orderNumber || order.order_number || order._id || order.id} · Placed{' '}
+                            {new Date(order.createdAt).toLocaleString()}
                         </p>
                     </div>
                     <div className="flex gap-2">

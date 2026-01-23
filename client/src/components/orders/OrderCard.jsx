@@ -45,13 +45,18 @@ const OrderCard = ({ order }) => {
         return activeStatuses.includes(order.status?.toLowerCase());
     };
 
+    const orderId = order._id || order.id;
+    const orderNumber = order.orderNumber || order.order_number || order.id;
+
     const handleCardClick = () => {
-        navigate(`/orders/${order.id}`);
+        if (!orderId) return;
+        navigate(`/orders/${orderId}`);
     };
 
     const handleTrackOrder = (e) => {
         e.stopPropagation(); // Prevent card click
-        navigate(`/orders/${order.id}`);
+        if (!orderId) return;
+        navigate(`/orders/${orderId}`);
     };
 
     return (
@@ -63,7 +68,7 @@ const OrderCard = ({ order }) => {
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Order #{order.id?.toString().padStart(6, '0') || order.order_number}
+                        Order #{orderNumber?.toString().padStart(6, '0')}
                     </h3>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                         <Clock size={16} />

@@ -1,9 +1,9 @@
-import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { User, Lock } from 'lucide-react';
 
 function ProfileTabs({ activeTab, onTabChange }) {
     const tabs = [
-        { id: 'account', label: 'Account', icon: UserIcon },
-        { id: 'password', label: 'Password', icon: LockClosedIcon },
+        { id: 'account', label: 'Account', icon: User },
+        { id: 'password', label: 'Password', icon: Lock },
     ];
 
     return (

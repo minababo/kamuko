@@ -25,22 +25,24 @@ function ProfileForm({ user, setProfileData }) {
             setErrorMessage('');
             setSuccessMessage('');
 
-            const response = await api.put('/me', {
+            const response = await api.patch('/users/me', {
                 username: data.username,
                 phone: data.phone,
             });
 
-            setProfileData(response.data.user);
+            const updatedUser = response.data?.user || response.data;
+            setProfileData(updatedUser);
 
             // Update localStorage
             const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const updatedUser = { ...storedUser, ...response.data.user };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+            const mergedUser = { ...storedUser, ...updatedUser };
+            localStorage.setItem('user', JSON.stringify(mergedUser));
 
             setSuccessMessage('Profile updated successfully!');
             setTimeout(() => setSuccessMessage(''), 5000);
         } catch (error) {
-            const message = error.response?.data?.message || 'Failed to update profile';
+            const message =
+                error.response?.data?.message || error.response?.data?.error || 'Failed to update profile';
             setErrorMessage(message);
         } finally {
             setIsSubmitting(false);
