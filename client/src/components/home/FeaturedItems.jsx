@@ -27,10 +27,12 @@ function FeaturedItems() {
             setIsLoading(true)
             setError(null)
             try {
-                const response = await api.get('/products/featured')
+                const response = await api.get('/menu-items', {
+                    params: { featured: true, limit: 6 },
+                })
                 const data = Array.isArray(response.data)
                     ? response.data
-                    : response.data?.items || response.data?.products || []
+                    : response.data?.items || response.data?.menuItems || []
 
                 const featured = mapItems(data).slice(0, 6)
                 if (!featured.length) {
@@ -38,7 +40,18 @@ function FeaturedItems() {
                 }
                 if (isActive) setItems(featured)
             } catch {
-                if (isActive) setError('Unable to load featured items right now.')
+                try {
+                    const response = await api.get('/products', {
+                        params: { available: true },
+                    })
+                    const data = Array.isArray(response.data)
+                        ? response.data
+                        : response.data?.items || response.data?.products || []
+                    const featured = mapItems(data).slice(0, 6)
+                    if (isActive) setItems(featured)
+                } catch {
+                    if (isActive) setError('Unable to load featured items right now.')
+                }
             } finally {
                 if (isActive) setIsLoading(false)
             }
