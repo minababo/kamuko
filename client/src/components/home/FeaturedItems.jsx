@@ -27,31 +27,19 @@ function FeaturedItems() {
             setIsLoading(true)
             setError(null)
             try {
-                const response = await api.get('/menu-items', {
-                    params: { featured: true, limit: 6 },
-                })
+                const response = await api.get('/products/featured')
                 const data = Array.isArray(response.data)
                     ? response.data
-                    : response.data?.items || response.data?.menuItems || []
+                    : response.data?.items || response.data?.products || []
 
                 const featured = mapItems(data).slice(0, 6)
                 if (!featured.length) {
-                    throw new Error('No featured items found')
+                    if (isActive) setError('No featured items available right now.')
+                    return
                 }
                 if (isActive) setItems(featured)
             } catch {
-                try {
-                    const response = await api.get('/products', {
-                        params: { available: true },
-                    })
-                    const data = Array.isArray(response.data)
-                        ? response.data
-                        : response.data?.items || response.data?.products || []
-                    const featured = mapItems(data).slice(0, 6)
-                    if (isActive) setItems(featured)
-                } catch {
-                    if (isActive) setError('Unable to load featured items right now.')
-                }
+                if (isActive) setError('Unable to load featured items right now.')
             } finally {
                 if (isActive) setIsLoading(false)
             }

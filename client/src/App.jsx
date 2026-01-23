@@ -58,11 +58,17 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Admin Routes */}
-        <Route element={<ProtectedRoute roles={['admin']} />}>
+        {/* Admin & Manager Routes */}
+        <Route element={<ProtectedRoute roles={['manager', 'admin']} />}>
           <Route path="admin" element={<StaffLayout />}>
             <Route path="menu" element={<MenuManagement />} />
             <Route path="categories" element={<CategoryManagement />} />
+          </Route>
+        </Route>
+
+        {/* Admin-only Routes */}
+        <Route element={<ProtectedRoute roles={['admin']} />}>
+          <Route path="admin" element={<StaffLayout />}>
             <Route path="users" element={<UserManagement />} />
           </Route>
         </Route>

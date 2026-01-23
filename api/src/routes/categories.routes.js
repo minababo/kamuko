@@ -6,6 +6,7 @@ const { ROLES } = require("../utils/constants");
 const {
   createCategory,
   listCategories,
+  listAllCategories,
   updateCategory,
   deleteCategory,
 } = require("../controllers/categories.controller");
@@ -13,6 +14,12 @@ const {
 const router = express.Router();
 
 router.get("/categories", listCategories);
+router.get(
+  "/categories/all",
+  authenticate,
+  requireRole(ROLES.MANAGER, ROLES.ADMIN),
+  listAllCategories
+);
 
 router.post(
   "/categories",
@@ -22,6 +29,13 @@ router.post(
 );
 
 router.put(
+  "/categories/:id",
+  authenticate,
+  requireRole(ROLES.MANAGER, ROLES.ADMIN),
+  updateCategory
+);
+
+router.patch(
   "/categories/:id",
   authenticate,
   requireRole(ROLES.MANAGER, ROLES.ADMIN),

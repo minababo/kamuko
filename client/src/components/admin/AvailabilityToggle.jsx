@@ -17,7 +17,7 @@ function AvailabilityToggle({ itemId, isAvailable, onToggle }) {
             if (onToggle) onToggle();
         } catch (error) {
             console.error('Failed to update availability:', error);
-            toast.error('Failed to update availability');
+            toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to update availability');
         } finally {
             setLoading(false);
         }

@@ -62,8 +62,8 @@ function StaffLayout() {
     },
     {
       to: "/admin/menu",
-      label: "Menu Management",
-      roles: ["admin"],
+      label: "Products",
+      roles: ["manager", "admin"],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +80,7 @@ function StaffLayout() {
     {
       to: "/admin/categories",
       label: "Categories",
-      roles: ["admin"],
+      roles: ["manager", "admin"],
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -13,10 +13,16 @@ function CategoryManager() {
         fetchCategories();
     }, []);
 
+    const normalizeCategory = (category) => ({
+        ...category,
+        id: category._id || category.id,
+    });
+
     const fetchCategories = async () => {
         try {
-            const response = await api.get('/categories');
-            setCategories(response.data.categories || response.data || []);
+            const response = await api.get('/categories/all');
+            const data = response.data.categories || response.data || [];
+            setCategories(data.map(normalizeCategory));
         } catch (error) {
             console.error('Failed to fetch categories:', error);
             toast.error('Failed to load categories');
@@ -57,7 +63,7 @@ function CategoryManager() {
             fetchCategories();
         } catch (error) {
             console.error('Failed to update category:', error);
-            toast.error('Failed to update category status');
+            toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to update category status');
         }
     };
 

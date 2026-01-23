@@ -34,6 +34,13 @@ router.put(
   updateProduct
 );
 
+router.patch(
+  "/products/:id",
+  authenticate,
+  requireRole(ROLES.MANAGER, ROLES.ADMIN),
+  updateProduct
+);
+
 router.delete(
   "/products/:id",
   authenticate,

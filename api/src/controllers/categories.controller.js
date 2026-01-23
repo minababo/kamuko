@@ -3,7 +3,12 @@ const { writeAuditLog } = require("../utils/audit");
 
 async function createCategory(req, res) {
   try {
-    const category = await Category.create({ name: req.body.name });
+    const category = await Category.create({
+      name: req.body.name,
+      description: req.body.description || "",
+      displayOrder: req.body.displayOrder ?? 0,
+      isActive: req.body.isActive ?? true,
+    });
 
     await writeAuditLog({
       actorId: req.user._id,
@@ -23,7 +28,19 @@ async function createCategory(req, res) {
 
 async function listCategories(req, res) {
   try {
-    const categories = await Category.find({ isActive: true }).sort({ name: 1 });
+    const categories = await Category.find({ isActive: true }).sort({
+      displayOrder: 1,
+      name: 1,
+    });
+    return res.json(categories);
+  } catch {
+    return res.status(500).json({ error: "Failed to fetch categories" });
+  }
+}
+
+async function listAllCategories(req, res) {
+  try {
+    const categories = await Category.find().sort({ displayOrder: 1, name: 1 });
     return res.json(categories);
   } catch {
     return res.status(500).json({ error: "Failed to fetch categories" });
@@ -32,9 +49,15 @@ async function listCategories(req, res) {
 
 async function updateCategory(req, res) {
   try {
+    const updates = {};
+    if (req.body.name !== undefined) updates.name = req.body.name;
+    if (req.body.description !== undefined) updates.description = req.body.description;
+    if (req.body.displayOrder !== undefined) updates.displayOrder = req.body.displayOrder;
+    if (req.body.isActive !== undefined) updates.isActive = req.body.isActive;
+
     const updated = await Category.findByIdAndUpdate(
       req.params.id,
-      { name: req.body.name },
+      updates,
       { new: true, runValidators: true }
     );
 
@@ -89,6 +112,7 @@ async function deleteCategory(req, res) {
 module.exports = {
   createCategory,
   listCategories,
+  listAllCategories,
   updateCategory,
   deleteCategory,
 };

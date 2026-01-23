@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import MenuItemForm from './MenuItemForm';
 import AvailabilityToggle from './AvailabilityToggle';
+import FeaturedToggle from './FeaturedToggle';
 import api from '../../utils/api';
 
 function MenuItemTable() {
@@ -12,6 +13,7 @@ function MenuItemTable() {
     const [editingItem, setEditingItem] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [sortKey, setSortKey] = useState('name');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -19,14 +21,29 @@ function MenuItemTable() {
         fetchData();
     }, []);
 
+    const normalizeCategory = (category) => ({
+        ...category,
+        id: category._id || category.id,
+    });
+
+    const normalizeItem = (item) => ({
+        ...item,
+        id: item._id || item.id,
+        categoryId: item.category?._id || item.category || item.categoryId,
+        categoryName: item.category?.name || item.categoryName,
+        isFeatured: item.isFeatured ?? false,
+    });
+
     const fetchData = async () => {
         try {
             const [itemsRes, categoriesRes] = await Promise.all([
                 api.get('/products'),
-                api.get('/categories'),
+                api.get('/categories/all'),
             ]);
-            setItems(itemsRes.data.products || itemsRes.data || []);
-            setCategories(categoriesRes.data.categories || categoriesRes.data || []);
+            const itemData = itemsRes.data.products || itemsRes.data || [];
+            const categoryData = categoriesRes.data.categories || categoriesRes.data || [];
+            setItems(itemData.map(normalizeItem));
+            setCategories(categoryData.map(normalizeCategory));
         } catch (error) {
             console.error('Failed to fetch data:', error);
             toast.error('Failed to load menu items');
@@ -70,16 +87,27 @@ function MenuItemTable() {
     const filteredItems = items.filter((item) => {
         const matchesSearch =
             searchQuery === '' ||
-            item.name?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory =
+            item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.categoryName?.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory =
             selectedCategory === 'all' || item.categoryId === selectedCategory;
         return matchesSearch && matchesCategory;
     });
 
+    const sortedItems = [...filteredItems].sort((a, b) => {
+        if (sortKey === 'price') {
+            return (a.price || 0) - (b.price || 0);
+        }
+        if (sortKey === 'category') {
+            return (a.categoryName || '').localeCompare(b.categoryName || '');
+        }
+        return (a.name || '').localeCompare(b.name || '');
+    });
+
     // Pagination
-    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedItems = sortedItems.slice(startIndex, startIndex + itemsPerPage);
 
     if (loading) {
         return (
@@ -93,7 +121,7 @@ function MenuItemTable() {
         <div className="space-y-4">
             {/* Filters and Actions */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-1 gap-3">
+                <div className="flex flex-1 flex-wrap gap-3">
                     {/* Search */}
                     <div className="relative flex-1">
                         <input
@@ -103,7 +131,7 @@ function MenuItemTable() {
                                 setSearchQuery(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            placeholder="Search items..."
+                        placeholder="Search products or categories..."
                             className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                         />
                         <svg
@@ -127,7 +155,7 @@ function MenuItemTable() {
                             setSelectedCategory(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="rounded-lg border border-gray-300 px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                     >
                         <option value="all">All Categories</option>
                         {categories.map((cat) => (
@@ -135,6 +163,16 @@ function MenuItemTable() {
                                 {cat.name}
                             </option>
                         ))}
+                    </select>
+
+                    <select
+                        value={sortKey}
+                        onChange={(e) => setSortKey(e.target.value)}
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    >
+                        <option value="name">Sort: Name</option>
+                        <option value="category">Sort: Category</option>
+                        <option value="price">Sort: Price</option>
                     </select>
                 </div>
 
@@ -155,13 +193,13 @@ function MenuItemTable() {
                             clipRule="evenodd"
                         />
                     </svg>
-                    Add Item
+                    Add Product
                 </button>
             </div>
 
             {/* Results Count */}
             <div className="text-sm text-gray-600">
-                Showing {paginatedItems.length} of {filteredItems.length} items
+                Showing {paginatedItems.length} of {sortedItems.length} products
             </div>
 
             {/* Table */}
@@ -184,6 +222,9 @@ function MenuItemTable() {
                             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                 Available
                             </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                Featured
+                            </th>
                             <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                                 Actions
                             </th>
@@ -192,7 +233,7 @@ function MenuItemTable() {
                     <tbody className="divide-y divide-gray-200 bg-white">
                         {paginatedItems.length === 0 ? (
                             <tr>
-                                <td colSpan="6" className="px-6 py-12 text-center">
+                                <td colSpan="7" className="px-6 py-12 text-center">
                                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -209,12 +250,12 @@ function MenuItemTable() {
                                         </svg>
                                     </div>
                                     <p className="mt-4 text-sm font-medium text-gray-900">
-                                        No items found
+                                        No products found
                                     </p>
                                     <p className="mt-1 text-sm text-gray-500">
                                         {searchQuery || selectedCategory !== 'all'
                                             ? 'Try adjusting your filters'
-                                            : 'Get started by adding your first menu item'}
+                                            : 'Get started by adding your first product'}
                                     </p>
                                 </td>
                             </tr>
@@ -252,7 +293,8 @@ function MenuItemTable() {
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                                        {categories.find((c) => c.id === item.categoryId)?.name ||
+                                        {item.categoryName ||
+                                            categories.find((c) => c.id === item.categoryId)?.name ||
                                             '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
@@ -262,6 +304,13 @@ function MenuItemTable() {
                                         <AvailabilityToggle
                                             itemId={item.id}
                                             isAvailable={item.isAvailable}
+                                            onToggle={fetchData}
+                                        />
+                                    </td>
+                                    <td className="whitespace-nowrap px-6 py-4">
+                                        <FeaturedToggle
+                                            itemId={item.id}
+                                            isFeatured={item.isFeatured}
                                             onToggle={fetchData}
                                         />
                                     </td>

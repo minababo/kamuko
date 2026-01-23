@@ -17,7 +17,7 @@ function CategoryForm({ category, onClose, onSuccess }) {
             setFormData({
                 name: category.name || '',
                 description: category.description || '',
-                displayOrder: category.displayOrder || 0,
+                displayOrder: category.displayOrder ?? 0,
                 isActive: category.isActive ?? true,
             });
         }
@@ -48,17 +48,24 @@ function CategoryForm({ category, onClose, onSuccess }) {
         setLoading(true);
 
         try {
+            const payload = {
+                name: formData.name,
+                description: formData.description,
+                displayOrder: Number(formData.displayOrder) || 0,
+                isActive: formData.isActive,
+            };
+
             if (category) {
-                await api.put(`/categories/${category.id}`, formData);
+                await api.put(`/categories/${category.id || category._id}`, payload);
                 toast.success('Category updated successfully');
             } else {
-                await api.post('/categories', formData);
+                await api.post('/categories', payload);
                 toast.success('Category created successfully');
             }
             onSuccess();
         } catch (error) {
             console.error('Failed to save category:', error);
-            toast.error(error.response?.data?.message || 'Failed to save category');
+            toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to save category');
         } finally {
             setLoading(false);
         }
@@ -129,7 +136,7 @@ function CategoryForm({ category, onClose, onSuccess }) {
                                 value={formData.name}
                                 onChange={handleChange}
                                 className={`mt-1 block w-full rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'
-                                    } px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
+                                    } bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
                                 placeholder="e.g., Main Courses"
                             />
                             {errors.name && (
@@ -151,7 +158,7 @@ function CategoryForm({ category, onClose, onSuccess }) {
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={3}
-                                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 placeholder="Brief description of this category"
                             />
                         </div>
@@ -172,7 +179,7 @@ function CategoryForm({ category, onClose, onSuccess }) {
                                 onChange={handleChange}
                                 min="0"
                                 className={`mt-1 block w-full rounded-lg border ${errors.displayOrder ? 'border-red-300' : 'border-gray-300'
-                                    } px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
+                                    } bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
                             />
                             {errors.displayOrder && (
                                 <p className="mt-1 text-sm text-red-600">

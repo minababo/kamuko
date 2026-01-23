@@ -11,6 +11,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
         categoryId: '',
         imageUrl: '',
         isAvailable: true,
+        isFeatured: false,
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
@@ -21,9 +22,10 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                 name: item.name || '',
                 description: item.description || '',
                 price: item.price || '',
-                categoryId: item.categoryId || '',
+                categoryId: item.category?._id || item.categoryId || item.category || '',
                 imageUrl: item.imageUrl || '',
                 isAvailable: item.isAvailable ?? true,
+                isFeatured: item.isFeatured ?? false,
             });
         }
     }, [item]);
@@ -58,21 +60,26 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
 
         try {
             const payload = {
-                ...formData,
+                name: formData.name,
+                description: formData.description,
                 price: parseFloat(formData.price),
+                category: formData.categoryId,
+                imageUrl: formData.imageUrl,
+                isAvailable: formData.isAvailable,
+                isFeatured: formData.isFeatured,
             };
 
             if (item) {
-                await api.put(`/products/${item.id}`, payload);
-                toast.success('Item updated successfully');
+                await api.put(`/products/${item.id || item._id}`, payload);
+                toast.success('Product updated successfully');
             } else {
                 await api.post('/products', payload);
-                toast.success('Item created successfully');
+                toast.success('Product created successfully');
             }
             onSuccess();
         } catch (error) {
             console.error('Failed to save item:', error);
-            toast.error(error.response?.data?.message || 'Failed to save item');
+            toast.error(error.response?.data?.message || error.response?.data?.error || 'Failed to save product');
         } finally {
             setLoading(false);
         }
@@ -109,7 +116,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                             <h2 className="text-xl font-semibold text-gray-900">
-                                {item ? 'Edit Menu Item' : 'Add New Menu Item'}
+                                {item ? 'Edit Product' : 'Add New Product'}
                             </h2>
                             <button
                                 type="button"
@@ -149,7 +156,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                         value={formData.name}
                                         onChange={handleChange}
                                         className={`mt-1 block w-full rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'
-                                            } px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
+                                            } bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
                                         placeholder="e.g., Margherita Pizza"
                                     />
                                     {errors.name && (
@@ -171,7 +178,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                         value={formData.categoryId}
                                         onChange={handleChange}
                                         className={`mt-1 block w-full rounded-lg border ${errors.categoryId ? 'border-red-300' : 'border-gray-300'
-                                            } px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
+                                            } bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
                                     >
                                         <option value="">Select a category</option>
                                         {categories.map((cat) => (
@@ -206,7 +213,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                             min="0"
                                             step="0.01"
                                             className={`block w-full rounded-lg border ${errors.price ? 'border-red-300' : 'border-gray-300'
-                                                } py-2 pl-8 pr-4 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
+                                                } bg-white py-2 pl-8 pr-4 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500`}
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -229,7 +236,7 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                         value={formData.description}
                                         onChange={handleChange}
                                         rows={3}
-                                        className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                        className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                         placeholder="Brief description of the item"
                                     />
                                 </div>
@@ -261,6 +268,26 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                             className="text-sm font-medium text-gray-700"
                                         >
                                             Available for ordering
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Featured Toggle */}
+                                <div className="md:col-span-2">
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="checkbox"
+                                            id="isFeatured"
+                                            name="isFeatured"
+                                            checked={formData.isFeatured}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                        />
+                                        <label
+                                            htmlFor="isFeatured"
+                                            className="text-sm font-medium text-gray-700"
+                                        >
+                                            Featured on home page
                                         </label>
                                     </div>
                                 </div>
@@ -305,9 +332,9 @@ function MenuItemForm({ item, categories, onClose, onSuccess }) {
                                             Saving...
                                         </span>
                                     ) : item ? (
-                                        'Update Item'
+                                        'Update Product'
                                     ) : (
-                                        'Create Item'
+                                        'Create Product'
                                     )}
                                 </button>
                             </div>
