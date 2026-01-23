@@ -1,5 +1,3 @@
-import { UserCircle } from 'lucide-react';
-
 function ProfileHeader({ user }) {
     // Generate initials from username
     const getInitials = (name) => {
@@ -35,7 +33,7 @@ function ProfileHeader({ user }) {
                             loading="lazy"
                         />
                     ) : (
-                        <UserCircle className="h-10 w-10" />
+                        getInitials(user.username || user.name)
                     )}
                 </div>
 

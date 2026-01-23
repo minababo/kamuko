@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import OrderQueueCard from '../../components/staff/OrderQueueCard';
 import OrderDetailPanel from '../../components/staff/OrderDetailPanel';
@@ -11,21 +11,7 @@ function OrderQueue() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
 
-    useEffect(() => {
-        fetchOrders();
-        // Auto-refresh every 15 seconds
-        const interval = setInterval(fetchOrders, 15000);
-        return () => clearInterval(interval);
-    }, [statusFilter]);
-
-    useEffect(() => {
-        const status = searchParams.get('status');
-        if (status) {
-            setStatusFilter(status);
-        }
-    }, [searchParams]);
-
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
             const params = new URLSearchParams();
             if (statusFilter && statusFilter !== 'all') {
@@ -47,7 +33,21 @@ function OrderQueue() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter]);
+
+    useEffect(() => {
+        fetchOrders();
+        // Auto-refresh every 15 seconds
+        const interval = setInterval(fetchOrders, 15000);
+        return () => clearInterval(interval);
+    }, [fetchOrders]);
+
+    useEffect(() => {
+        const status = searchParams.get('status');
+        if (status) {
+            setStatusFilter(status);
+        }
+    }, [searchParams]);
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
