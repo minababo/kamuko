@@ -13,6 +13,9 @@ function Checkout() {
     const [error, setError] = useState(null)
     const [pickupTime, setPickupTime] = useState('')
     const [termsAccepted, setTermsAccepted] = useState(false)
+    const [settings, setSettings] = useState(null)
+    const [settingsLoading, setSettingsLoading] = useState(false)
+    const [settingsError, setSettingsError] = useState(null)
 
     // Redirect to cart if empty
     useEffect(() => {
@@ -20,6 +23,37 @@ function Checkout() {
             navigate('/cart')
         }
     }, [items, navigate])
+
+    useEffect(() => {
+        let active = true
+
+        const fetchSettings = async () => {
+            try {
+                setSettingsLoading(true)
+                const response = await api.get('/settings/store')
+                if (active) {
+                    setSettings(response.data)
+                    setSettingsError(null)
+                }
+            } catch (err) {
+                if (active) {
+                    setSettingsError(
+                        err.response?.data?.message ||
+                        err.response?.data?.error ||
+                        'Failed to load store settings'
+                    )
+                }
+            } finally {
+                if (active) setSettingsLoading(false)
+            }
+        }
+
+        fetchSettings()
+
+        return () => {
+            active = false
+        }
+    }, [])
 
     const handlePlaceOrder = async () => {
         if (!termsAccepted) {
@@ -32,31 +66,42 @@ function Checkout() {
             return
         }
 
+        if (settings && !settings.orderingOpen) {
+            setError(settings.closedMessage || 'Ordering is currently closed')
+            return
+        }
+
         setLoading(true)
         setError(null)
 
         try {
-            // Prepare order data
-            const orderData = {
-                items: items.map(item => ({
-                    product_id: item.id,
-                    quantity: item.quantity,
-                    unit_price: item.price
-                })),
-                pickup_time: pickupTime,
-                payment_method: 'cash',
-                total_amount: total
-            }
+            // Sync local cart to server cart used by checkout
+            await api.delete('/cart')
+            await Promise.all(
+                items.map((item) =>
+                    api.post('/cart/items', {
+                        productId: item.id || item._id,
+                        quantity: item.quantity,
+                        note: item.notes || item.note || '',
+                    })
+                )
+            )
 
             // Create order
-            const response = await api.post('/orders/checkout', orderData)
+            const response = await api.post('/orders/checkout', {
+                customerNote: '',
+            })
 
             // Clear cart and redirect to confirmation
             clearCart()
-            navigate(`/orders/${response.data.order.id}/confirmation`)
+            navigate(`/orders/${response.data.orderId}/confirmation`)
         } catch (err) {
             console.error('Order error:', err)
-            setError(err.response?.data?.message || 'Failed to place order. Please try again.')
+            setError(
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                'Failed to place order. Please try again.'
+            )
         } finally {
             setLoading(false)
         }
@@ -80,6 +125,18 @@ function Checkout() {
                     <p className="text-sm font-medium text-red-800">{error}</p>
                 </div>
             )}
+            {!settingsLoading && settings?.orderingOpen === false && (
+                <div className="rounded-lg bg-orange-50 p-4">
+                    <p className="text-sm font-medium text-orange-800">
+                        {settings.closedMessage || 'Ordering is currently closed'}
+                    </p>
+                </div>
+            )}
+            {settingsError && (
+                <div className="rounded-lg bg-red-50 p-4">
+                    <p className="text-sm font-medium text-red-800">{settingsError}</p>
+                </div>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
                 {/* Main content */}
@@ -100,6 +157,7 @@ function Checkout() {
                         setTermsAccepted={setTermsAccepted}
                         onPlaceOrder={handlePlaceOrder}
                         loading={loading}
+                        orderingOpen={settings?.orderingOpen !== false}
                     />
                 </div>
             </div>

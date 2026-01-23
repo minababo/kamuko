@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PendingOrdersAlert from '../../components/staff/PendingOrdersAlert';
 import api from '../../utils/api';
+import { useAuth } from '../../hooks/useAuth';
 
 function Dashboard() {
+    const { user } = useAuth();
     const [stats, setStats] = useState({
         pending: 0,
         preparing: 0,
@@ -12,6 +14,11 @@ function Dashboard() {
     });
     const [recentOrders, setRecentOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [settings, setSettings] = useState(null);
+    const [settingsLoading, setSettingsLoading] = useState(false);
+    const [settingsError, setSettingsError] = useState(null);
+
+    const canManageSettings = ['manager', 'admin'].includes(user?.role);
 
     const fetchDashboardData = useCallback(async () => {
         try {
@@ -56,12 +63,49 @@ function Dashboard() {
         }
     }, []);
 
+    const fetchSettings = useCallback(async () => {
+        try {
+            setSettingsLoading(true);
+            setSettingsError(null);
+            const response = await api.get('/settings/store');
+            setSettings(response.data);
+        } catch (error) {
+            setSettingsError(
+                error.response?.data?.error || 'Failed to load store settings'
+            );
+        } finally {
+            setSettingsLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         fetchDashboardData();
         // Refresh every 30 seconds
         const interval = setInterval(fetchDashboardData, 30000);
         return () => clearInterval(interval);
     }, [fetchDashboardData]);
+
+    useEffect(() => {
+        fetchSettings();
+    }, [fetchSettings]);
+
+    const handleToggleOrdering = async () => {
+        if (!settings || !canManageSettings) return;
+        try {
+            setSettingsLoading(true);
+            setSettingsError(null);
+            const response = await api.put('/settings/store', {
+                orderingOpen: !settings.orderingOpen,
+            });
+            setSettings(response.data);
+        } catch (error) {
+            setSettingsError(
+                error.response?.data?.error || 'Failed to update ordering status'
+            );
+        } finally {
+            setSettingsLoading(false);
+        }
+    };
 
     const statCards = [
         {
@@ -200,6 +244,53 @@ function Dashboard() {
             </div>
 
             <PendingOrdersAlert count={stats.pending} />
+
+            {/* Store Settings */}
+            <div className="rounded-lg border border-gray-200 bg-white p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Store Settings</h2>
+                        <p className="text-sm text-gray-600">
+                            Control whether customers can place new orders.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {settingsLoading ? (
+                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-200 border-t-orange-600" />
+                        ) : (
+                            <span
+                                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                    settings?.orderingOpen
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-red-100 text-red-700'
+                                }`}
+                            >
+                                {settings?.orderingOpen ? 'Ordering Open' : 'Ordering Closed'}
+                            </span>
+                        )}
+                        <button
+                            type="button"
+                            onClick={handleToggleOrdering}
+                            disabled={!canManageSettings || settingsLoading}
+                            className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                                canManageSettings
+                                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            {settings?.orderingOpen ? 'Close Orders' : 'Open Orders'}
+                        </button>
+                    </div>
+                </div>
+                {settingsError && (
+                    <p className="mt-3 text-sm text-red-600">{settingsError}</p>
+                )}
+                {!canManageSettings && (
+                    <p className="mt-3 text-xs text-gray-500">
+                        Only managers and admins can change ordering status.
+                    </p>
+                )}
+            </div>
 
             {/* Stats Grid */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -354,6 +445,7 @@ function Dashboard() {
                     )}
                 </div>
             </div>
+
         </div>
     );
 }

@@ -1,6 +1,14 @@
 import { ShoppingBag, Loader2 } from 'lucide-react'
 
-function OrderSummary({ items, total, termsAccepted, setTermsAccepted, onPlaceOrder, loading }) {
+function OrderSummary({
+    items,
+    total,
+    termsAccepted,
+    setTermsAccepted,
+    onPlaceOrder,
+    loading,
+    orderingOpen = true,
+}) {
     return (
         <section className="rounded-3xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Order Summary</h2>
@@ -68,7 +76,7 @@ function OrderSummary({ items, total, termsAccepted, setTermsAccepted, onPlaceOr
             <button
                 type="button"
                 onClick={onPlaceOrder}
-                disabled={loading || !termsAccepted}
+                disabled={loading || !termsAccepted || !orderingOpen}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
                 {loading ? (
@@ -83,6 +91,11 @@ function OrderSummary({ items, total, termsAccepted, setTermsAccepted, onPlaceOr
                     </>
                 )}
             </button>
+            {!orderingOpen && (
+                <p className="mt-3 text-xs font-medium text-orange-700">
+                    Ordering is currently closed.
+                </p>
+            )}
 
             {/* Additional Info */}
             <div className="mt-4 rounded-lg bg-gray-50 p-3">

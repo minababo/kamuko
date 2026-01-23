@@ -19,6 +19,7 @@ import ProtectedRoute from './components/common/ProtectedRoute'
 import StaffLayout from './components/staff/StaffLayout'
 import StaffDashboard from './pages/staff/Dashboard'
 import OrderQueue from './pages/staff/OrderQueue'
+import AuditLog from './pages/staff/AuditLog'
 import MenuManagement from './pages/admin/MenuManagement'
 import CategoryManagement from './pages/admin/CategoryManagement'
 import UserManagement from './pages/admin/UserManagement'
@@ -78,6 +79,12 @@ function App() {
           <Route path="staff" element={<StaffLayout />}>
             <Route index element={<StaffDashboard />} />
             <Route path="orders" element={<OrderQueue />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute roles={['manager', 'admin']} />}>
+          <Route path="staff" element={<StaffLayout />}>
+            <Route path="audit" element={<AuditLog />} />
           </Route>
         </Route>
 

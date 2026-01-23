@@ -115,6 +115,31 @@ function StaffLayout() {
         </svg>
       ),
     },
+    {
+      to: "/staff/audit",
+      label: "Audit Log",
+      roles: ["manager", "admin"],
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="h-5 w-5"
+        >
+          <path
+            fillRule="evenodd"
+            d="M2.25 6A3.75 3.75 0 016 2.25h6a3.75 3.75 0 013.75 3.75v2.25A3.75 3.75 0 0112 12H6A3.75 3.75 0 012.25 8.25V6zm3.75-2.25A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5h6a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0012 3.75H6z"
+            clipRule="evenodd"
+          />
+          <path
+            fillRule="evenodd"
+            d="M2.25 15.75A3.75 3.75 0 016 12h6a3.75 3.75 0 013.75 3.75v2.25A3.75 3.75 0 0112 21.75H6A3.75 3.75 0 012.25 18v-2.25zM6 13.5a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25h6A2.25 2.25 0 0014.25 18v-2.25A2.25 2.25 0 0012 13.5H6z"
+            clipRule="evenodd"
+          />
+          <path d="M17.25 6a.75.75 0 000 1.5H21a.75.75 0 000-1.5h-3.75zM17.25 9.75a.75.75 0 000 1.5H21a.75.75 0 000-1.5h-3.75zM17.25 15a.75.75 0 000 1.5H21a.75.75 0 000-1.5h-3.75zM17.25 18.75a.75.75 0 000 1.5H21a.75.75 0 000-1.5h-3.75z" />
+        </svg>
+      ),
+    },
   ];
 
   const visibleNavItems = navItems.filter((item) =>
