@@ -76,7 +76,7 @@ async function changePassword(req, res) {
     await user.save();
 
     return res.json({ message: "Password updated" });
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({
       error: "Failed to update password",
     });
