@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PendingOrdersAlert from '../../components/staff/PendingOrdersAlert';
+import api from '../../utils/api';
 
 function Dashboard() {
     const [stats, setStats] = useState({
@@ -12,44 +13,38 @@ function Dashboard() {
     const [recentOrders, setRecentOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchDashboardData();
-        // Refresh every 30 seconds
-        const interval = setInterval(fetchDashboardData, 30000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
         try {
-            const response = await fetch('/api/orders?limit=5', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+            const response = await api.get('/orders', { params: { limit: 5 } });
+            const data = response.data || {};
+            const orders = Array.isArray(data) ? data : data.orders || [];
+
+            // Calculate stats from orders
+            const pending = orders.filter((o) => o.status === 'pending').length || 0;
+            const preparing = orders.filter((o) => o.status === 'preparing').length || 0;
+            const ready = orders.filter((o) => o.status === 'ready').length || 0;
+
+            setStats({
+                pending,
+                preparing,
+                ready,
+                completedToday: data.completedToday || 0,
             });
 
-            if (response.ok) {
-                const data = await response.json();
-
-                // Calculate stats from orders
-                const pending = data.orders?.filter((o) => o.status === 'pending').length || 0;
-                const preparing = data.orders?.filter((o) => o.status === 'preparing').length || 0;
-                const ready = data.orders?.filter((o) => o.status === 'ready').length || 0;
-
-                setStats({
-                    pending,
-                    preparing,
-                    ready,
-                    completedToday: data.completedToday || 0,
-                });
-
-                setRecentOrders(data.orders?.slice(0, 5) || []);
-            }
+            setRecentOrders(orders.slice(0, 5));
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchDashboardData();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchDashboardData, 30000);
+        return () => clearInterval(interval);
+    }, [fetchDashboardData]);
 
     const statCards = [
         {

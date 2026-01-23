@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import api from '../../utils/api';
 import OrderQueueCard from '../../components/staff/OrderQueueCard';
 import OrderDetailPanel from '../../components/staff/OrderDetailPanel';
 
@@ -18,16 +19,11 @@ function OrderQueue() {
                 params.append('status', statusFilter);
             }
 
-            const response = await fetch(`/api/orders?${params}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
+            const response = await api.get('/orders', {
+                params: statusFilter && statusFilter !== 'all' ? { status: statusFilter } : undefined,
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                setOrders(data.orders || []);
-            }
+            const data = response.data;
+            setOrders(Array.isArray(data) ? data : data?.orders || []);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
         } finally {
@@ -51,24 +47,14 @@ function OrderQueue() {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            const response = await fetch(`/api/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: JSON.stringify({ status: newStatus }),
-            });
-
-            if (response.ok) {
-                // Refresh orders
-                await fetchOrders();
-                // Update selected order if it's open
-                if (selectedOrder?.id === orderId) {
-                    const updatedOrder = orders.find((o) => o.id === orderId);
-                    if (updatedOrder) {
-                        setSelectedOrder({ ...updatedOrder, status: newStatus });
-                    }
+            await api.patch(`/orders/${orderId}/status`, { status: newStatus });
+            // Refresh orders
+            await fetchOrders();
+            // Update selected order if it's open
+            if (selectedOrder?.id === orderId) {
+                const updatedOrder = orders.find((o) => o.id === orderId);
+                if (updatedOrder) {
+                    setSelectedOrder({ ...updatedOrder, status: newStatus });
                 }
             }
         } catch (error) {
