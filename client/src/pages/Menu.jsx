@@ -43,11 +43,12 @@ function Menu() {
             setIsLoading(true)
             setError(null)
             try {
-                const endpoint =
-                    categoryParam && categoryParam !== 'all'
-                        ? `/menu-items/category/${categoryParam}`
-                        : '/menu-items'
-                const response = await api.get(endpoint)
+                const response = await api.get('/products', {
+                    params:
+                        categoryParam && categoryParam !== 'all'
+                            ? { category: categoryParam }
+                            : undefined,
+                })
                 const data = Array.isArray(response.data)
                     ? response.data
                     : response.data?.items || response.data?.menuItems || []
