@@ -21,6 +21,7 @@ import StaffDashboard from './pages/staff/Dashboard'
 import OrderQueue from './pages/staff/OrderQueue'
 import MenuManagement from './pages/admin/MenuManagement'
 import CategoryManagement from './pages/admin/CategoryManagement'
+import UserManagement from './pages/admin/UserManagement'
 
 function PageShell({ title, subtitle, children }) {
   return (
@@ -62,11 +63,12 @@ function App() {
           <Route path="admin" element={<StaffLayout />}>
             <Route path="menu" element={<MenuManagement />} />
             <Route path="categories" element={<CategoryManagement />} />
+            <Route path="users" element={<UserManagement />} />
           </Route>
         </Route>
 
         {/* Staff Routes */}
-        <Route element={<ProtectedRoute roles={['staff', 'admin']} />}>
+        <Route element={<ProtectedRoute roles={['cashier', 'manager', 'admin']} />}>
           <Route path="staff" element={<StaffLayout />}>
             <Route index element={<StaffDashboard />} />
             <Route path="orders" element={<OrderQueue />} />

@@ -5,18 +5,18 @@ function OrderStatusSelector({ currentStatus, orderId, onStatusChange }) {
     const [isUpdating, setIsUpdating] = useState(false);
 
     const statusTransitions = {
-        pending: [
-            { value: 'accepted', label: 'Accept Order', color: 'text-blue-600' },
-            { value: 'cancelled', label: 'Reject Order', color: 'text-red-600' },
+        placed: [
+            { value: 'preparing', label: 'Accept & Start Prep', color: 'text-blue-600' },
+            { value: 'cancelled', label: 'Cancel Order', color: 'text-red-600' },
         ],
-        accepted: [{ value: 'preparing', label: 'Mark Preparing', color: 'text-blue-600' }],
         preparing: [{ value: 'ready', label: 'Mark Ready', color: 'text-green-600' }],
         ready: [{ value: 'completed', label: 'Complete Order', color: 'text-gray-600' }],
         completed: [],
         cancelled: [],
     };
 
-    const validNextStatuses = statusTransitions[currentStatus] || [];
+    const normalizedStatus = currentStatus === 'pending' ? 'placed' : currentStatus;
+    const validNextStatuses = statusTransitions[normalizedStatus] || [];
 
     const handleStatusChange = async (newStatus) => {
         setIsUpdating(true);

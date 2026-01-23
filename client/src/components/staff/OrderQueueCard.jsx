@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import OrderStatusSelector from './OrderStatusSelector';
 
-function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
+function OrderQueueCard({ order, onStatusChange, onViewDetails, isLoadingDetails = false }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const formatTime = (dateString) => {
@@ -17,14 +17,19 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
 
     const getStatusColor = (status) => {
         const colors = {
+            placed: 'bg-yellow-100 text-yellow-700 border-yellow-300',
             pending: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-            accepted: 'bg-blue-100 text-blue-700 border-blue-300',
             preparing: 'bg-blue-100 text-blue-700 border-blue-300',
             ready: 'bg-green-100 text-green-700 border-green-300',
             completed: 'bg-gray-100 text-gray-700 border-gray-300',
             cancelled: 'bg-red-100 text-red-700 border-red-300',
         };
         return colors[status] || 'bg-gray-100 text-gray-700 border-gray-300';
+    };
+
+    const getStatusLabel = (status) => {
+        if (status === 'placed') return 'pending';
+        return status;
     };
 
     const getUrgencyColor = (minutes) => {
@@ -36,6 +41,8 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
     const timeSincePlaced = Math.floor(
         (new Date() - new Date(order.createdAt)) / 1000 / 60
     );
+    const orderId = order._id || order.id;
+    const orderNumber = order.orderNumber || order.order_number;
 
     return (
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -64,7 +71,7 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
                         </div>
                         <div>
                             <div className="font-semibold text-gray-900">
-                                Order #{order.id?.slice(-8) || order.orderNumber}
+                                Order #{orderNumber?.toString().slice(-8) || orderId?.slice(-8)}
                             </div>
                             <div className={`text-sm font-medium ${getUrgencyColor(timeSincePlaced)}`}>
                                 {formatTime(order.createdAt)}
@@ -74,7 +81,7 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
                     <span
                         className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusColor(order.status)}`}
                     >
-                        {order.status}
+                        {getStatusLabel(order.status)}
                     </span>
                 </div>
             </div>
@@ -92,9 +99,11 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
                         >
                             <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" />
                         </svg>
-                        <span>{order.items?.length || 0} items</span>
+                        <span>
+                            {order.itemCount ?? order.items?.length ?? '—'} items
+                        </span>
                     </div>
-                    {order.totalAmount && (
+                    {(order.totalAmount || order.total) && (
                         <div className="flex items-center gap-1">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -109,44 +118,52 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
                                     clipRule="evenodd"
                                 />
                             </svg>
-                            <span>${order.totalAmount.toFixed(2)}</span>
+                            <span>${(order.totalAmount || order.total).toFixed(2)}</span>
                         </div>
                     )}
                 </div>
 
                 {/* Items Preview */}
-                <div className="mb-4 space-y-2">
-                    {(isExpanded ? order.items : order.items?.slice(0, 2))?.map((item, index) => (
-                        <div
-                            key={index}
-                            className="flex items-start justify-between rounded-md bg-gray-50 p-2 text-sm"
-                        >
-                            <div className="flex-1">
-                                <div className="font-medium text-gray-900">
-                                    {item.quantity}x {item.name || item.productName}
+                {order.items?.length ? (
+                    <div className="mb-4 space-y-2">
+                        {(isExpanded ? order.items : order.items?.slice(0, 2))?.map((item, index) => (
+                            <div
+                                key={index}
+                                className="flex items-start justify-between rounded-md bg-gray-50 p-2 text-sm"
+                            >
+                                <div className="flex-1">
+                                    <div className="font-medium text-gray-900">
+                                        {item.quantity}x {item.name || item.productName}
+                                    </div>
+                                    {item.specialInstructions && (
+                                        <div className="mt-1 text-xs text-gray-600">
+                                            Note: {item.specialInstructions}
+                                        </div>
+                                    )}
                                 </div>
-                                {item.specialInstructions && (
-                                    <div className="mt-1 text-xs text-gray-600">
-                                        Note: {item.specialInstructions}
+                                {(item.price || item.unitPrice) && (
+                                    <div className="text-gray-600">
+                                        ${(item.price || item.unitPrice).toFixed(2)}
                                     </div>
                                 )}
                             </div>
-                            {item.price && (
-                                <div className="text-gray-600">${item.price.toFixed(2)}</div>
-                            )}
-                        </div>
-                    ))}
+                        ))}
 
-                    {order.items?.length > 2 && !isExpanded && (
-                        <button
-                            type="button"
-                            onClick={() => setIsExpanded(true)}
-                            className="text-sm font-medium text-orange-600 hover:text-orange-700"
-                        >
-                            + {order.items.length - 2} more items
-                        </button>
-                    )}
-                </div>
+                        {order.items?.length > 2 && !isExpanded && (
+                            <button
+                                type="button"
+                                onClick={() => setIsExpanded(true)}
+                                className="text-sm font-medium text-orange-600 hover:text-orange-700"
+                            >
+                                + {order.items.length - 2} more items
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="mb-4 rounded-md border border-dashed border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+                        Item details available in order view.
+                    </div>
+                )}
 
                 {/* Order Notes */}
                 {order.notes && (
@@ -160,15 +177,16 @@ function OrderQueueCard({ order, onStatusChange, onViewDetails }) {
                 <div className="flex items-center gap-2">
                     <OrderStatusSelector
                         currentStatus={order.status}
-                        orderId={order.id}
+                        orderId={orderId}
                         onStatusChange={onStatusChange}
                     />
                     <button
                         type="button"
                         onClick={onViewDetails}
+                        disabled={isLoadingDetails}
                         className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
-                        View Details
+                        {isLoadingDetails ? 'Loading...' : 'View Details'}
                     </button>
                 </div>
 

@@ -123,11 +123,43 @@ async function listOrders(req, res) {
 
     const orders = await Order.find(filter)
       .populate("user", "name email role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return res.json(orders);
+    const orderIds = orders.map((order) => order._id);
+    const itemCounts = await OrderItem.aggregate([
+      { $match: { order: { $in: orderIds } } },
+      { $group: { _id: "$order", itemCount: { $sum: "$quantity" } } },
+    ]);
+
+    const countMap = itemCounts.reduce((acc, entry) => {
+      acc[entry._id.toString()] = entry.itemCount;
+      return acc;
+    }, {});
+
+    const enriched = orders.map((order) => ({
+      ...order,
+      itemCount: countMap[order._id.toString()] || 0,
+    }));
+
+    return res.json(enriched);
   } catch {
     return res.status(500).json({ error: "Failed to fetch orders" });
+  }
+}
+
+// Staff order details
+async function getOrderByIdForStaff(req, res) {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("user", "name email role")
+      .lean();
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const items = await OrderItem.find({ order: order._id }).lean();
+    return res.json({ ...order, items });
+  } catch {
+    return res.status(400).json({ error: "Invalid order id" });
   }
 }
 
@@ -185,6 +217,7 @@ module.exports = {
   checkout,
   getMyOrders,
   getMyOrderById,
+  getOrderByIdForStaff,
   listOrders,
   updateOrderStatus,
 };

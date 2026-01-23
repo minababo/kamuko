@@ -18,20 +18,37 @@ function Dashboard() {
             const response = await api.get('/orders', { params: { limit: 5 } });
             const data = response.data || {};
             const orders = Array.isArray(data) ? data : data.orders || [];
+            const normalizedOrders = orders.map((order) => ({
+                ...order,
+                id: order._id || order.id,
+                orderNumber: order.orderNumber || order.order_number,
+                itemCount: order.itemCount ?? order.items?.length ?? 0,
+            }));
 
             // Calculate stats from orders
-            const pending = orders.filter((o) => o.status === 'pending').length || 0;
-            const preparing = orders.filter((o) => o.status === 'preparing').length || 0;
-            const ready = orders.filter((o) => o.status === 'ready').length || 0;
+            const pending = normalizedOrders.filter((o) => o.status === 'placed').length || 0;
+            const preparing = normalizedOrders.filter((o) => o.status === 'preparing').length || 0;
+            const ready = normalizedOrders.filter((o) => o.status === 'ready').length || 0;
+            const completedToday =
+                normalizedOrders.filter((o) => {
+                    if (o.status !== 'completed') return false;
+                    const updated = new Date(o.updatedAt || o.createdAt);
+                    const now = new Date();
+                    return (
+                        updated.getFullYear() === now.getFullYear() &&
+                        updated.getMonth() === now.getMonth() &&
+                        updated.getDate() === now.getDate()
+                    );
+                }).length || 0;
 
             setStats({
                 pending,
                 preparing,
                 ready,
-                completedToday: data.completedToday || 0,
+                completedToday,
             });
 
-            setRecentOrders(orders.slice(0, 5));
+            setRecentOrders(normalizedOrders.slice(0, 5));
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         } finally {
@@ -136,6 +153,7 @@ function Dashboard() {
     const getStatusColor = (status) => {
         const colors = {
             pending: 'bg-yellow-100 text-yellow-700',
+            placed: 'bg-yellow-100 text-yellow-700',
             accepted: 'bg-blue-100 text-blue-700',
             preparing: 'bg-blue-100 text-blue-700',
             ready: 'bg-green-100 text-green-700',
@@ -144,6 +162,8 @@ function Dashboard() {
         };
         return colors[status] || 'bg-gray-100 text-gray-700';
     };
+
+    const getStatusLabel = (status) => (status === 'placed' ? 'pending' : status);
 
     const formatTime = (dateString) => {
         const date = new Date(dateString);
@@ -297,10 +317,10 @@ function Dashboard() {
                                     <div className="flex items-center gap-4">
                                         <div>
                                             <div className="font-medium text-gray-900">
-                                                Order #{order.id?.slice(-8)}
+                                                Order #{order.orderNumber?.toString().slice(-8) || order.id?.slice(-8)}
                                             </div>
                                             <div className="text-sm text-gray-600">
-                                                {order.items?.length || 0} items • {formatTime(order.createdAt)}
+                                                {order.itemCount || 0} items • {formatTime(order.createdAt)}
                                             </div>
                                         </div>
                                     </div>
@@ -308,10 +328,10 @@ function Dashboard() {
                                         <span
                                             className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(order.status)}`}
                                         >
-                                            {order.status}
+                                            {getStatusLabel(order.status)}
                                         </span>
                                         <Link
-                                            to={`/staff/orders/${order.id}`}
+                                            to="/staff/orders"
                                             className="text-orange-600 hover:text-orange-700"
                                         >
                                             <svg

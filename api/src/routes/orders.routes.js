@@ -7,6 +7,7 @@ const {
   checkout,
   getMyOrders,
   getMyOrderById,
+  getOrderByIdForStaff,
   listOrders,
   updateOrderStatus,
 } = require("../controllers/orders.controller");
@@ -24,6 +25,13 @@ router.get(
   authenticate,
   requireRole(ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN),
   listOrders
+);
+
+router.get(
+  "/orders/:id",
+  authenticate,
+  requireRole(ROLES.CASHIER, ROLES.MANAGER, ROLES.ADMIN),
+  getOrderByIdForStaff
 );
 
 router.patch(

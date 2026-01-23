@@ -28,8 +28,8 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
 
     const getStatusColor = (status) => {
         const colors = {
+            placed: 'bg-yellow-100 text-yellow-700 border-yellow-300',
             pending: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-            accepted: 'bg-blue-100 text-blue-700 border-blue-300',
             preparing: 'bg-blue-100 text-blue-700 border-blue-300',
             ready: 'bg-green-100 text-green-700 border-green-300',
             completed: 'bg-gray-100 text-gray-700 border-gray-300',
@@ -37,6 +37,10 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
         };
         return colors[status] || 'bg-gray-100 text-gray-700 border-gray-300';
     };
+
+    const getStatusLabel = (status) => (status === 'placed' ? 'pending' : status);
+    const orderId = order._id || order.id;
+    const orderNumber = order.orderNumber || order.order_number;
 
     return (
         <>
@@ -56,7 +60,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-xl font-bold text-gray-900">
-                                Order #{order.id?.slice(-8) || order.orderNumber}
+                                Order #{orderNumber?.toString().slice(-8) || orderId?.slice(-8)}
                             </h2>
                             <p className="text-sm text-gray-600">
                                 Placed {formatTime(order.createdAt)}
@@ -94,7 +98,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                             <span
                                 className={`inline-flex rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(order.status)}`}
                             >
-                                {order.status}
+                                {getStatusLabel(order.status)}
                             </span>
                         </div>
                     </div>
@@ -105,7 +109,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                             Customer Information
                         </h3>
                         <div className="space-y-2">
-                            {order.customer?.name && (
+                            {order.user?.name && (
                                 <div className="flex items-center gap-2 text-sm">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -119,10 +123,10 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                                             clipRule="evenodd"
                                         />
                                     </svg>
-                                    <span className="text-gray-900">{order.customer.name}</span>
+                                    <span className="text-gray-900">{order.user.name}</span>
                                 </div>
                             )}
-                            {order.customer?.email && (
+                            {order.user?.email && (
                                 <div className="flex items-center gap-2 text-sm">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -133,10 +137,10 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                                         <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
                                         <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
                                     </svg>
-                                    <span className="text-gray-600">{order.customer.email}</span>
+                                    <span className="text-gray-600">{order.user.email}</span>
                                 </div>
                             )}
-                            {order.customer?.phone && (
+                            {order.user?.phone && (
                                 <div className="flex items-center gap-2 text-sm">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -150,7 +154,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                                             clipRule="evenodd"
                                         />
                                     </svg>
-                                    <span className="text-gray-600">{order.customer.phone}</span>
+                                    <span className="text-gray-600">{order.user.phone}</span>
                                 </div>
                             )}
                         </div>
@@ -181,14 +185,19 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {item.price && (
+                                        {(item.price || item.unitPrice) && (
                                             <div className="ml-4 font-medium text-gray-900">
-                                                ${(item.price * item.quantity).toFixed(2)}
+                                                ${((item.price || item.unitPrice) * item.quantity).toFixed(2)}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             ))}
+                            {!order.items?.length && (
+                                <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                                    Item details are not available for this order.
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -230,11 +239,11 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                                     </span>
                                 </div>
                             )}
-                            {order.totalAmount && (
+                            {(order.totalAmount || order.total) && (
                                 <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-semibold">
                                     <span className="text-gray-900">Total</span>
                                     <span className="text-gray-900">
-                                        ${order.totalAmount.toFixed(2)}
+                                        ${(order.totalAmount || order.total).toFixed(2)}
                                     </span>
                                 </div>
                             )}
@@ -279,7 +288,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }) {
                     <div className="flex gap-3">
                         <OrderStatusSelector
                             currentStatus={order.status}
-                            orderId={order.id}
+                            orderId={orderId}
                             onStatusChange={onStatusChange}
                         />
                         <button

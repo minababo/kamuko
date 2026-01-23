@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { ROLES } = require("../utils/constants");
 
 async function getMe(req, res) {
   return res.json({
@@ -83,4 +84,35 @@ async function changePassword(req, res) {
   }
 }
 
-module.exports = { getMe, updateMe, changePassword };
+async function listUsers(req, res) {
+  try {
+    const users = await User.find({ isActive: true })
+      .select("name email role username profileImageUrl createdAt")
+      .sort({ createdAt: -1 });
+    return res.json(users);
+  } catch {
+    return res.status(500).json({ error: "Failed to fetch users" });
+  }
+}
+
+async function updateUserRole(req, res) {
+  try {
+    const { role } = req.body || {};
+    if (!Object.values(ROLES).includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true, runValidators: true }
+    ).select("name email role username profileImageUrl createdAt");
+
+    if (!updated) return res.status(404).json({ error: "User not found" });
+    return res.json(updated);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = { getMe, updateMe, changePassword, listUsers, updateUserRole };

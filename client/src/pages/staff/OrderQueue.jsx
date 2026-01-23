@@ -11,6 +11,7 @@ function OrderQueue() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
+    const [detailLoadingId, setDetailLoadingId] = useState(null);
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -23,7 +24,14 @@ function OrderQueue() {
                 params: statusFilter && statusFilter !== 'all' ? { status: statusFilter } : undefined,
             });
             const data = response.data;
-            setOrders(Array.isArray(data) ? data : data?.orders || []);
+            const rawOrders = Array.isArray(data) ? data : data?.orders || [];
+            const normalized = rawOrders.map((order) => ({
+                ...order,
+                id: order._id || order.id,
+                orderNumber: order.orderNumber || order.order_number,
+                displayStatus: order.status === 'placed' ? 'pending' : order.status,
+            }));
+            setOrders(normalized);
         } catch (error) {
             console.error('Failed to fetch orders:', error);
         } finally {
@@ -41,7 +49,7 @@ function OrderQueue() {
     useEffect(() => {
         const status = searchParams.get('status');
         if (status) {
-            setStatusFilter(status);
+            setStatusFilter(status === 'pending' ? 'placed' : status);
         }
     }, [searchParams]);
 
@@ -67,7 +75,7 @@ function OrderQueue() {
         if (status === 'all') {
             searchParams.delete('status');
         } else {
-            searchParams.set('status', status);
+            searchParams.set('status', status === 'placed' ? 'pending' : status);
         }
         setSearchParams(searchParams);
     };
@@ -83,14 +91,9 @@ function OrderQueue() {
     const statusOptions = [
         { value: 'all', label: 'All Orders', count: orders.length },
         {
-            value: 'pending',
+            value: 'placed',
             label: 'Pending',
-            count: orders.filter((o) => o.status === 'pending').length,
-        },
-        {
-            value: 'accepted',
-            label: 'Accepted',
-            count: orders.filter((o) => o.status === 'accepted').length,
+            count: orders.filter((o) => o.status === 'placed').length,
         },
         {
             value: 'preparing',
@@ -107,7 +110,43 @@ function OrderQueue() {
             label: 'Completed',
             count: orders.filter((o) => o.status === 'completed').length,
         },
+        {
+            value: 'cancelled',
+            label: 'Cancelled',
+            count: orders.filter((o) => o.status === 'cancelled').length,
+        },
     ];
+
+    const handleViewDetails = async (order) => {
+        const orderId = order._id || order.id;
+        if (!orderId) {
+            setSelectedOrder(order);
+            return;
+        }
+        try {
+            setDetailLoadingId(orderId);
+            const response = await api.get(`/orders/${orderId}`);
+            const detail = response.data || {};
+            setSelectedOrder({
+                ...detail,
+                id: detail._id || detail.id || orderId,
+                orderNumber: detail.orderNumber || detail.order_number || order.orderNumber,
+            });
+        } catch (error) {
+            console.error('Failed to load order details:', error);
+            setSelectedOrder(order);
+        } finally {
+            setDetailLoadingId(null);
+        }
+    };
+
+    const statusLabelMap = {
+        placed: 'pending',
+        preparing: 'preparing',
+        ready: 'ready',
+        completed: 'completed',
+        cancelled: 'cancelled',
+    };
 
     return (
         <div className="space-y-6">
@@ -217,7 +256,7 @@ function OrderQueue() {
                             ? 'Try adjusting your search'
                             : statusFilter === 'all'
                                 ? 'No orders yet'
-                                : `No ${statusFilter} orders`}
+                                : `No ${statusLabelMap[statusFilter] || statusFilter} orders`}
                     </p>
                 </div>
             ) : (
@@ -227,7 +266,8 @@ function OrderQueue() {
                             key={order.id}
                             order={order}
                             onStatusChange={handleStatusChange}
-                            onViewDetails={() => setSelectedOrder(order)}
+                            onViewDetails={() => handleViewDetails(order)}
+                            isLoadingDetails={detailLoadingId === order.id}
                         />
                     ))}
                 </div>

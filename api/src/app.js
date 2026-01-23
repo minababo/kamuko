@@ -13,6 +13,7 @@ function createApp() {
   app.use(express.json());
   app.use(morgan("dev"));
 
+  app.use("/api", routes);
   app.use(routes);
 
   app.use((req, res) => {
