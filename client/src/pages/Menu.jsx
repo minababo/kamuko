@@ -19,6 +19,7 @@ const normalizeItem = (item) => ({
     price: Number(item.price) || 0,
     imageUrl: item.imageUrl || item.image || item.photo,
     categoryId: item.category?._id || item.category || item.categoryId,
+    categoryActive: item.category?.isActive,
 })
 
 function Menu() {
@@ -43,17 +44,21 @@ function Menu() {
             setIsLoading(true)
             setError(null)
             try {
-                const endpoint =
-                    categoryParam && categoryParam !== 'all'
-                        ? `/menu-items/category/${categoryParam}`
-                        : '/menu-items'
-                const response = await api.get(endpoint)
+                const response = await api.get('/products', {
+                    params:
+                        categoryParam && categoryParam !== 'all'
+                            ? { category: categoryParam }
+                            : {},
+                })
                 const data = Array.isArray(response.data)
                     ? response.data
-                    : response.data?.items || response.data?.menuItems || []
+                    : response.data?.items || response.data?.products || []
 
                 if (isActive) {
-                    setItems(data.map(normalizeItem))
+                    const normalized = data.map(normalizeItem);
+                    setItems(
+                        normalized.filter((item) => item.categoryActive !== false)
+                    )
                 }
             } catch {
                 if (isActive) setError('Unable to load menu items right now.')
@@ -118,7 +123,7 @@ function Menu() {
     }
 
     return (
-        <div className="space-y-8 pb-16">
+        <div className="mx-auto w-full max-w-6xl space-y-8 px-4 pb-16 sm:px-6 lg:px-8">
             <header className="rounded-3xl bg-white p-6 shadow-sm sm:p-8">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="space-y-2">
@@ -139,7 +144,7 @@ function Menu() {
                 </div>
             </header>
 
-            <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+            <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
                 <aside className="space-y-4">
                     <div className="rounded-2xl bg-white p-4 shadow-sm">
                         <h2 className="text-sm font-semibold text-gray-900">Filter by category</h2>

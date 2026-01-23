@@ -34,14 +34,6 @@ function OrderSummary({
                     <span>Subtotal</span>
                     <span className="font-semibold text-gray-900">${total.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                    <span>Service Fee</span>
-                    <span className="font-semibold text-gray-900">$0.00</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                    <span>Delivery Fee</span>
-                    <span className="font-semibold text-gray-900">$0.00</span>
-                </div>
             </div>
 
             {/* Total */}

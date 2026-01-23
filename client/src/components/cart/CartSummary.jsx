@@ -22,10 +22,6 @@ function CartSummary() {
                     <span>Subtotal</span>
                     <span className="font-semibold text-gray-900">${total.toFixed(2)}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                    <span>Delivery</span>
-                    <span className="text-gray-400">Calculated at checkout</span>
-                </div>
             </div>
             <div className="flex items-center justify-between border-t border-dashed border-gray-200 pt-4 text-base font-semibold text-gray-900">
                 <span>Total</span>

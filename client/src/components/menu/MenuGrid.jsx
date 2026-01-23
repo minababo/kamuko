@@ -3,7 +3,7 @@ import MenuItemCard from './MenuItemCard'
 function MenuGrid({ items, isLoading }) {
     if (isLoading) {
         return (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {Array.from({ length: 6 }).map((_, index) => (
                     <div
                         key={`menu-skeleton-${index}`}
@@ -26,7 +26,7 @@ function MenuGrid({ items, isLoading }) {
     }
 
     return (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {items.map((item) => (
                 <MenuItemCard key={item.id} item={item} />
             ))}

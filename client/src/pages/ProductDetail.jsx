@@ -37,7 +37,7 @@ function ProductDetail() {
             setError(null)
             setIsNotFound(false)
             try {
-                const response = await api.get(`/menu-items/${id}`)
+                const response = await api.get(`/products/${id}`)
                 const data = response.data?.item || response.data?.menuItem || response.data
                 if (!data) {
                     if (isActive) setIsNotFound(true)
@@ -68,7 +68,9 @@ function ProductDetail() {
         const loadRelated = async () => {
             if (!item?.categoryId || !item?.id) return
             try {
-                const response = await api.get(`/menu-items/category/${item.categoryId}`)
+                const response = await api.get('/products', {
+                    params: { category: item.categoryId },
+                })
                 const data = Array.isArray(response.data)
                     ? response.data
                     : response.data?.items || response.data?.menuItems || []

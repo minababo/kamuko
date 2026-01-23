@@ -11,7 +11,6 @@ function Checkout() {
     const { items, total, clearCart } = useCart()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
-    const [pickupTime, setPickupTime] = useState('')
     const [termsAccepted, setTermsAccepted] = useState(false)
     const [settings, setSettings] = useState(null)
     const [settingsLoading, setSettingsLoading] = useState(false)
@@ -58,11 +57,6 @@ function Checkout() {
     const handlePlaceOrder = async () => {
         if (!termsAccepted) {
             setError('Please accept the terms and conditions')
-            return
-        }
-
-        if (!pickupTime) {
-            setError('Please select a pickup time')
             return
         }
 
@@ -141,10 +135,7 @@ function Checkout() {
             <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
                 {/* Main content */}
                 <div className="space-y-6">
-                    <PickupInfo
-                        pickupTime={pickupTime}
-                        setPickupTime={setPickupTime}
-                    />
+                    <PickupInfo />
                     <PaymentInfo />
                 </div>
 

@@ -45,10 +45,15 @@ async function listProducts(req, res) {
     if (req.query.available === "true") filter.isAvailable = true;
 
     const products = await Product.find(filter)
-      .populate("category", "name")
+      .populate("category", "name isActive")
       .sort({ createdAt: -1 });
 
-    return res.json(products);
+    if (req.query.includeInactiveCategories === "true") {
+      return res.json(products);
+    }
+
+    const visible = products.filter((product) => product.category?.isActive !== false);
+    return res.json(visible);
   } catch {
     return res.status(500).json({ error: "Failed to fetch products" });
   }

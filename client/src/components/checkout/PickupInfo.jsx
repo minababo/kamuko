@@ -1,53 +1,6 @@
-import { useEffect } from 'react'
 import { MapPin, Clock } from 'lucide-react'
 
-function PickupInfo({ pickupTime, setPickupTime }) {
-    // Generate pickup time options (current time + 30 mins to + 4 hours, in 15-min intervals)
-    const generateTimeOptions = () => {
-        const options = []
-        const now = new Date()
-
-        // Add 30 minutes minimum preparation time
-        now.setMinutes(now.getMinutes() + 30)
-
-        // Round to nearest 15 minutes
-        const minutes = now.getMinutes()
-        const roundedMinutes = Math.ceil(minutes / 15) * 15
-        now.setMinutes(roundedMinutes)
-        now.setSeconds(0)
-
-        // Generate options for next 4 hours
-        for (let i = 0; i < 16; i++) {
-            const time = new Date(now.getTime() + i * 15 * 60000)
-            const hours = time.getHours()
-            const mins = time.getMinutes()
-
-            // Format time as HH:MM
-            const timeString = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
-
-            // Display format (12-hour with AM/PM)
-            const displayHours = hours % 12 || 12
-            const ampm = hours >= 12 ? 'PM' : 'AM'
-            const displayString = `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`
-
-            options.push({
-                value: timeString,
-                display: displayString
-            })
-        }
-
-        return options
-    }
-
-    const timeOptions = generateTimeOptions()
-
-    // Set default pickup time (first option)
-    useEffect(() => {
-        if (!pickupTime && timeOptions.length > 0) {
-            setPickupTime(timeOptions[0].value)
-        }
-    }, [pickupTime, setPickupTime, timeOptions])
-
+function PickupInfo() {
     return (
         <section className="rounded-3xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Pickup Information</h2>
@@ -94,28 +47,8 @@ function PickupInfo({ pickupTime, setPickupTime }) {
                     </div>
                 </div>
 
-                {/* Pickup Time Selection */}
-                <div className="border-t border-gray-200 pt-6">
-                    <label htmlFor="pickupTime" className="block text-sm font-medium text-gray-900">
-                        Select Pickup Time *
-                    </label>
-                    <p className="mt-1 text-sm text-gray-600">
-                        Minimum preparation time: 30 minutes
-                    </p>
-                    <select
-                        id="pickupTime"
-                        value={pickupTime}
-                        onChange={(e) => setPickupTime(e.target.value)}
-                        className="mt-3 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        required
-                    >
-                        <option value="">Choose a time</option>
-                        {timeOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.display}
-                            </option>
-                        ))}
-                    </select>
+                <div className="border-t border-gray-200 pt-6 text-sm text-gray-600">
+                    Pickup time will be confirmed after your order is placed.
                 </div>
             </div>
         </section>

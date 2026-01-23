@@ -37,7 +37,7 @@ function MenuItemTable() {
     const fetchData = async () => {
         try {
             const [itemsRes, categoriesRes] = await Promise.all([
-                api.get('/products'),
+                api.get('/products', { params: { includeInactiveCategories: true } }),
                 api.get('/categories/all'),
             ]);
             const itemData = itemsRes.data.products || itemsRes.data || [];

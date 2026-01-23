@@ -69,7 +69,7 @@ function MenuItemCard({ item }) {
                         {item.description || 'Seasonal chef-crafted favorite.'}
                     </p>
                 </div>
-                <div className="mt-auto flex items-center justify-between gap-3">
+                <div className="mt-auto flex flex-col gap-3">
                     <div className="flex items-center rounded-full border border-gray-200 px-2 py-1">
                         <button
                             type="button"
@@ -94,7 +94,7 @@ function MenuItemCard({ item }) {
                     <button
                         type="button"
                         onClick={handleAdd}
-                        className="rounded-full border border-orange-200 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:border-orange-300 hover:bg-orange-50"
+                        className="w-full rounded-full border border-orange-200 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:border-orange-300 hover:bg-orange-50"
                     >
                         Add to cart
                     </button>
