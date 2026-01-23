@@ -23,7 +23,7 @@ const OrderDetails = () => {
         const fetchOrder = async () => {
             try {
                 setLoading(true);
-                const response = await api.get(`/orders/${id}`);
+                const response = await api.get(`/orders/my/${id}`);
                 setOrder(response.data);
                 setError(null);
             } catch (err) {
@@ -56,9 +56,22 @@ const OrderDetails = () => {
             order.items.forEach((orderItem) => {
                 // Extract item details from different possible structures
                 const itemData = {
-                    id: orderItem.menuItemId || orderItem.productId || orderItem.id,
-                    name: orderItem.name || orderItem.menuItem?.name || orderItem.product?.name || 'Unknown Item',
-                    price: orderItem.price || orderItem.menuItem?.price || orderItem.product?.price || 0,
+                    id:
+                        orderItem.menuItemId ||
+                        orderItem.productId ||
+                        orderItem.product ||
+                        orderItem.id,
+                    name:
+                        orderItem.name ||
+                        orderItem.menuItem?.name ||
+                        orderItem.product?.name ||
+                        'Unknown Item',
+                    price:
+                        orderItem.unitPrice ||
+                        orderItem.price ||
+                        orderItem.menuItem?.price ||
+                        orderItem.product?.price ||
+                        0,
                     image: orderItem.image || orderItem.menuItem?.image || orderItem.product?.image,
                 };
 
@@ -171,7 +184,7 @@ const OrderDetails = () => {
 
                             {(order.status === 'pending' || order.status === 'preparing') && (
                                 <button
-                                    onClick={() => navigate(`/orders/${order.id}/track`)}
+                    onClick={() => navigate(`/orders/${order._id || order.id}/track`)}
                                     className="w-full rounded-lg border-2 border-orange-600 px-6 py-3 font-semibold text-orange-600 transition hover:bg-orange-50"
                                 >
                                     Track Order

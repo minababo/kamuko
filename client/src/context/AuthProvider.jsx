@@ -12,15 +12,40 @@ export function AuthProvider({ children }) {
         const checkAuthStatus = async () => {
             const token = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
+            let parsedUser = null;
 
-            if (token && storedUser) {
+            if (storedUser) {
                 try {
-                    // Verify token is still valid by making a request to the API
-                    const response = await api.get('/auth/me');
-                    setUser(response.data.user);
-                    setIsAuthenticated(true);
+                    parsedUser = JSON.parse(storedUser);
                 } catch {
-                    // Token is invalid, clear storage
+                    localStorage.removeItem('user');
+                }
+            }
+
+            if (parsedUser) {
+                setUser(parsedUser);
+                setIsAuthenticated(true);
+            }
+
+            if (!token) {
+                setUser(null);
+                setIsAuthenticated(false);
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                // Verify token is still valid by making a request to the API
+                const response = await api.get('/me');
+                const nextUser = response.data?.user || response.data;
+                if (nextUser) {
+                    setUser(nextUser);
+                    localStorage.setItem('user', JSON.stringify(nextUser));
+                }
+                setIsAuthenticated(true);
+            } catch (error) {
+                const status = error.response?.status;
+                if (status === 401 || status === 403) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
                     setUser(null);

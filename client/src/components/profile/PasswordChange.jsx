@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Eye, EyeOff } from 'lucide-react';
 import api from '../../utils/api';
 
 function PasswordChange() {
@@ -42,7 +42,7 @@ function PasswordChange() {
             setErrorMessage('');
             setSuccessMessage('');
 
-            await api.put('/me/password', {
+            await api.patch('/users/me/password', {
                 currentPassword: data.currentPassword,
                 newPassword: data.newPassword,
             });
@@ -51,7 +51,8 @@ function PasswordChange() {
             reset();
             setTimeout(() => setSuccessMessage(''), 5000);
         } catch (error) {
-            const message = error.response?.data?.message || 'Failed to update password';
+            const message =
+                error.response?.data?.message || error.response?.data?.error || 'Failed to update password';
             setErrorMessage(message);
         } finally {
             setIsSubmitting(false);
@@ -85,9 +86,9 @@ function PasswordChange() {
                             className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                             {showPassword.current ? (
-                                <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                                <EyeOff className="h-5 w-5 text-gray-400" />
                             ) : (
-                                <EyeIcon className="h-5 w-5 text-gray-400" />
+                                <Eye className="h-5 w-5 text-gray-400" />
                             )}
                         </button>
                     </div>
@@ -131,9 +132,9 @@ function PasswordChange() {
                             className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                             {showPassword.new ? (
-                                <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                                <EyeOff className="h-5 w-5 text-gray-400" />
                             ) : (
-                                <EyeIcon className="h-5 w-5 text-gray-400" />
+                                <Eye className="h-5 w-5 text-gray-400" />
                             )}
                         </button>
                     </div>
@@ -171,9 +172,9 @@ function PasswordChange() {
                             className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                             {showPassword.confirm ? (
-                                <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                                <EyeOff className="h-5 w-5 text-gray-400" />
                             ) : (
-                                <EyeIcon className="h-5 w-5 text-gray-400" />
+                                <Eye className="h-5 w-5 text-gray-400" />
                             )}
                         </button>
                     </div>

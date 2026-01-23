@@ -12,6 +12,8 @@ import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import OrderStatus from './pages/OrderStatus'
 import OrderDetails from './pages/OrderDetails'
+import OrderHistory from './pages/OrderHistory'
+import Profile from './pages/Profile'
 import MainLayout from './components/layout/MainLayout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import StaffLayout from './components/staff/StaffLayout'
@@ -29,20 +31,6 @@ function PageShell({ title, subtitle, children }) {
     </div>
   )
 }
-
-const Orders = () => (
-  <PageShell
-    title="Your orders"
-    subtitle="Track your latest orders and reorder your favorites."
-  />
-)
-
-const Profile = () => (
-  <PageShell
-    title="Profile"
-    subtitle="Manage your account details and delivery preferences."
-  />
-)
 
 const About = () => (
   <PageShell
@@ -101,7 +89,7 @@ function App() {
             <Route path="orders/:id/status" element={<OrderStatus />} />
             <Route path="orders/:id/track" element={<OrderStatus />} />
             <Route path="orders/:id" element={<OrderDetails />} />
-            <Route path="orders" element={<Orders />} />
+            <Route path="orders" element={<OrderHistory />} />
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<NotFound />} />

@@ -1,14 +1,15 @@
-import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { UserCircle } from 'lucide-react';
 
 function ProfileHeader({ user }) {
     // Generate initials from username
     const getInitials = (name) => {
-        if (!name) return '?';
-        const parts = name.split(' ');
+        const safeName = String(name || '').trim();
+        if (!safeName) return '?';
+        const parts = safeName.split(' ').filter(Boolean);
         if (parts.length >= 2) {
             return (parts[0][0] + parts[1][0]).toUpperCase();
         }
-        return name.substring(0, 2).toUpperCase();
+        return safeName.substring(0, 2).toUpperCase();
     };
 
     // Format member since date
@@ -26,13 +27,24 @@ function ProfileHeader({ user }) {
             <div className="flex items-center space-x-4">
                 {/* Avatar */}
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white">
-                    {getInitials(user.username)}
+                    {user.profileImageUrl ? (
+                        <img
+                            src={user.profileImageUrl}
+                            alt={user.username || 'Profile'}
+                            className="h-full w-full rounded-full object-cover"
+                            loading="lazy"
+                        />
+                    ) : (
+                        <UserCircle className="h-10 w-10" />
+                    )}
                 </div>
 
                 {/* User Info */}
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
-                    <p className="mt-1 text-gray-600">{user.email}</p>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        {user.username || user.name || 'Profile'}
+                    </h1>
+                    <p className="mt-1 text-gray-600">{user.email || 'No email on file'}</p>
                     <p className="mt-1 text-sm text-gray-500">
                         Member since {formatMemberSince(user.createdAt)}
                     </p>

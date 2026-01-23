@@ -26,11 +26,16 @@ const OrderHistory = () => {
             setLoading(true);
             setError(null);
 
-            const response = await api.get('/orders/my-orders');
+            const response = await api.get('/orders/my');
             const ordersData = response.data.data || response.data;
 
+            const normalizedOrders = (Array.isArray(ordersData) ? ordersData : []).map((order) => ({
+                ...order,
+                id: order._id || order.id,
+            }));
+
             // Sort orders by date (newest first)
-            const sortedOrders = ordersData.sort((a, b) => {
+            const sortedOrders = normalizedOrders.sort((a, b) => {
                 const dateA = new Date(a.created_at || a.createdAt);
                 const dateB = new Date(b.created_at || b.createdAt);
                 return dateB - dateA;

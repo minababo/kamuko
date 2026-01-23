@@ -25,11 +25,11 @@ function Profile() {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
-                const response = await api.get('/me');
-                setProfileData(response.data.user);
+                const response = await api.get('/users/me');
+                setProfileData(response.data?.user || response.data);
                 setError(null);
             } catch (err) {
-                setError(err.response?.data?.message || 'Failed to load profile');
+                setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load profile');
             } finally {
                 setLoading(false);
             }
